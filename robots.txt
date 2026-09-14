@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kayacomputing.github.io/kaya_computing/sitemap.xml
