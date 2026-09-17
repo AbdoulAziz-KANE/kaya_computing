@@ -1,8 +1,11 @@
-# Déploiement automatique du site sur GitHub Pages
+# Vérifications qualité + déploiement automatique sur GitHub Pages
 #
-# À chaque envoi (push) sur la branche main, ce workflow publie
-# automatiquement le contenu du dépôt sur GitHub Pages, sans passer
-# par l'upload manuel via le site web de GitHub.
+# À chaque envoi (push) sur la branche main :
+#   1. Le job "quality" valide le HTML et vérifie qu'il n'y a pas de
+#      lien cassé sur le site.
+#   2. Si tout est correct, le job "deploy" publie automatiquement le
+#      site sur GitHub Pages. Si une vérification échoue, le site
+#      n'est PAS republié (la version en ligne reste inchangée).
 #
 # Prérequis : dans Settings > Pages > Build and deployment > Source,
 # choisir "GitHub Actions" (au lieu de "Deploy from a branch").
@@ -24,7 +27,40 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  quality:
+    name: Vérifications qualité
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Valider le HTML
+        run: |
+          pip install html5validator
+          html5validator --root .
+
+      - name: Vérifier les liens du site
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # WhatsApp, Instagram, TikTok et X bloquent souvent les robots
+          # (erreur 403) sans que le lien soit réellement cassé : on les
+          # exclut pour éviter les faux échecs.
+          args: >-
+            --no-progress
+            --exclude-mail
+            --exclude "^https://(www\.)?(instagram|tiktok|x)\.com"
+            --exclude "^https://wa\.me"
+            "./**/*.html"
+          fail: true
+
   deploy:
+    name: Déploiement
+    needs: quality
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -44,4 +80,3 @@ jobs:
       - name: Publier sur GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
