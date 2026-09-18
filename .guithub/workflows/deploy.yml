@@ -1,19 +1,25 @@
 # Vérifications qualité + déploiement automatique sur GitHub Pages
 #
-# À chaque envoi (push) sur la branche main :
-#   1. Le job "quality" valide le HTML et vérifie qu'il n'y a pas de
-#      lien cassé sur le site.
-#   2. Si tout est correct, le job "deploy" publie automatiquement le
-#      site sur GitHub Pages. Si une vérification échoue, le site
-#      n'est PAS republié (la version en ligne reste inchangée).
+# Fonctionnement recommandé :
+#   1. Vous travaillez sur la branche "develop" (jamais directement sur main).
+#   2. Quand vous poussez sur "develop" ou ouvrez une Pull Request vers
+#      "main", le job "quality" valide le HTML et vérifie les liens —
+#      sans jamais publier le site.
+#   3. Une fois la Pull Request fusionnée (merge) dans "main", le job
+#      "deploy" publie automatiquement le site sur GitHub Pages.
+#
+# Résultat : le site en ligne n'est jamais modifié tant que les
+# vérifications n'ont pas été validées ET que le code n'est pas sur main.
 #
 # Prérequis : dans Settings > Pages > Build and deployment > Source,
 # choisir "GitHub Actions" (au lieu de "Deploy from a branch").
 
-name: Déployer le site sur GitHub Pages
+name: Vérifications et déploiement
 
 on:
   push:
+    branches: ["main", "develop"]
+  pull_request:
     branches: ["main"]
   workflow_dispatch:
 
@@ -61,6 +67,9 @@ jobs:
   deploy:
     name: Déploiement
     needs: quality
+    # Ne publie que sur un push réel vers main — jamais depuis une
+    # Pull Request ou un push sur develop.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
