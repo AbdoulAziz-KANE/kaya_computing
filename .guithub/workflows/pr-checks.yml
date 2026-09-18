@@ -1,0 +1,44 @@
+# Vérifications automatiques sur les branches de test
+#
+# Ce workflow s'exécute à chaque Pull Request visant la branche main
+# (par exemple depuis une branche "develop" ou une branche de
+# fonctionnalité). Il ne publie RIEN sur GitHub Pages : il sert
+# uniquement à repérer les erreurs avant la fusion dans main.
+#
+# Une fois la Pull Request fusionnée dans main, c'est le workflow
+# deploy.yml qui prend le relais pour publier le site.
+
+name: Vérifier une branche avant fusion
+
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  quality:
+    name: Vérifications qualité
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Valider le HTML
+        run: |
+          pip install html5validator
+          html5validator --root .
+
+      - name: Vérifier les liens du site
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --exclude-mail
+            --exclude "^https://(www\.)?(instagram|tiktok|x)\.com"
+            --exclude "^https://wa\.me"
+            "./**/*.html"
+          fail: true
