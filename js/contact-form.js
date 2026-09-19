@@ -19,8 +19,8 @@
 // N'utilisez jamais la clé "service_role" ici, elle doit rester secrète.
 // ------------------------------------------------------------------
 
-const SUPABASE_URL = 'https://oongkpfljcsqojkxpuml.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vbmdrcGZsamNzcW9qa3hwdW1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzMDEwNDQsImV4cCI6MjEwNDg3NzA0NH0.B6LajEpjqZ8a8x7SXFAVyylyEPhOo2Y5IOAT91RdGos';
+const SUPABASE_URL = 'https://VOTRE-PROJET.supabase.co';
+const SUPABASE_ANON_KEY = 'VOTRE_CLE_ANON_PUBLIQUE';
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.querySelector('#contact-form');
